@@ -1,34 +1,77 @@
 import argparse
+import xml.etree.ElementTree as ET
+import warnings
 
-#parser IO
-parser = argparse.ArgumentParser(
-                    prog='TCL-Generator for Calvados',
-                    description='Takes a calvados topology.pdb and generates a TCL sctipt to tell VMD which Atoms are bond.',
-                    epilog='END')
-parser.add_argument('filename') 
-args = parser.parse_args()
+def bonds_from_xml(filename):
+    #Generates bond atom pair iterator from xml file
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    forces = root.find("Forces")
+    bonds = forces[2][0]
 
-#topology_file = "hnRNPA1LCD_1/top.pdb"
-topology_file = args.filename
+    for bond in bonds:
+        #print(bond.attrib)
+        p1 = bond.attrib["p1"]
+        p2 = bond.attrib["p2"]
+        yield p1, p2
 
-output_file = """set blist {}
-"""
-entry_string = lambda x: f"lappend blist [list {x-1} {x} A-A]\n"
-atom_index = -1
-last_resid = 1000 #some index >0
-with open(topology_file) as inp:
-    for line in inp:
-        split = line.split()
-        if split[0] == "ATOM":
-            resid = int(split[5])
-            atom_index += 1
-            if resid == last_resid+1:
-                #if this is a bond atom
-                output_file += entry_string(atom_index)
-            last_resid = resid
+def bonds_from_pdb(filename):
+    #Generate bond info iterator from pdb (kinda deprecated)
+    warnings.warn("Be cautios if your Molecules are not line shaped. Tree like structures could lead to problems!")
+    atom_index = -1
+    last_resid = 1000 #some index >0
+    with open(filename) as inp:
+        for line in inp:
+            split = line.split()
+            if split[0] == "ATOM":
+                resid = int(split[5])
+                atom_index += 1
+                if resid == last_resid+1:
+                    #if this is a bond atom
+                    yield atom_index-1, atom_index
+                last_resid = resid
             
+def gen_tcl_script(iterator):
+    #takes the iterator and formats its output to tcl script
+    output_file = """set blist {}
+    """
+    entry_string = lambda p1, p2: f"lappend blist [list {p1} {p2} A-A]\n"
+    for p1, p2 in iterator:
+        output_file += entry_string(p1, p2)
+
+    output_file += "topo setbondlist type $blist"
+    return output_file
+
+def write_tcl_file(output_file, TCL_script):
+    #actually writes an tcl script
+    with open(output_file, "w") as w:
+        w.write(TCL_script)
+
+if __name__ == "__main__":
+    #parser IO
+    parser = argparse.ArgumentParser(
+                        prog='TCL-Generator for Calvados',
+                        description='Takes a calvados topology.pdb and generates a TCL sctipt to tell VMD which Atoms are bond.',
+                        epilog='END')
+    parser.add_argument('inputfile') 
+    parser.add_argument('outputfile') 
+    args = parser.parse_args()
+
+    input_file = args.inputfile
+    output_file = args.outputfile
+
+    inp_suffix = input_file.split(".")[-1]
+    if inp_suffix == "xml":
+        iterator = bonds_from_xml(input_file)
+    elif inp_suffix == "pdb":
+        #works only if all molecules have resids 0 to N
+        iterator = bonds_from_pdb(input_file)
+    else:
+        raise ValueError(f"Datatype of input file {input_file} unknown!")
+    
+    script = gen_tcl_script(iterator)
+    write_tcl_file(output_file, script)
 
 
-output_file += "topo setbondlist type $blist"
-with open("topolog.tcl", "w") as w:
-    w.write(output_file)
+
+
