@@ -85,12 +85,14 @@ if __name__ == "__main__":
     #bondTXT_pattern = re.compile("bonds_?*.txt")
     inp_suffix = input_file.split(".")[-1]
     #if bondTXT_pattern.match(input_file):
-    #    iterator = bonds_from_bondsTXT(input_file)
+    #    
     if inp_suffix == "xml":
         iterator = bonds_from_xml(input_file)
     elif inp_suffix == "pdb":
         #works only if all molecules have resids 0 to N
         iterator = bonds_from_pdb(input_file)
+    elif inp_suffix == "txt":
+        iterator = bonds_from_bondsTXT(input_file)
     else:
         raise ValueError(f"Datatype of input file {input_file} unknown!")
     
