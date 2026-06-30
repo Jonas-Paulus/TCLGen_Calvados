@@ -1,6 +1,9 @@
 import argparse
 import xml.etree.ElementTree as ET
 import warnings
+import re
+import numpy as np
+
 
 def bonds_from_xml(filename):
     #Generates bond atom pair iterator from xml file
@@ -30,6 +33,10 @@ def bonds_from_pdb(filename):
                     #if this is a bond atom
                     yield atom_index-1, atom_index
                 last_resid = resid
+    
+def bonds_from_bondsTXT(filename):
+    data = np.loadtxt(filename, skiprows = 1, usecols=[0,1], dtype = int)
+    return data[:,:2]
             
 def gen_tcl_script(iterator):
     #takes the iterator and formats its output to tcl script
@@ -59,8 +66,10 @@ if __name__ == "__main__":
 
     input_file = args.inputfile
     output_file = args.outputfile
-
+    #bondTXT_pattern = re.compile("bonds_?*.txt")
     inp_suffix = input_file.split(".")[-1]
+    #if bondTXT_pattern.match(input_file):
+    #    iterator = bonds_from_bondsTXT(input_file)
     if inp_suffix == "xml":
         iterator = bonds_from_xml(input_file)
     elif inp_suffix == "pdb":
