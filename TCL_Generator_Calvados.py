@@ -11,14 +11,22 @@ def bonds_from_xml(filename):
     root = tree.getroot()
     forces = root.find("Forces")
     for force in forces:
-        if force.attrib["energy"] == "k*(r-r0)^2":
+        is_harmonic = False
+        if force.attrib["name"] == "HarmonicBondForce":
+            is_harmonic = True
+        elif force.attrib["energy"] == "k*(r-r0)^2":
+            is_harmonic = True
+
+        if is_harmonic:
             bonds = force.find("Bonds")
             print(bonds[0].attrib)
             for bond in bonds:
                 #print(bond.attrib)
-                p1 = bond.attrib["p1"]
-                p2 = bond.attrib["p2"]
-                yield p1, p2
+                #k=700 are folded domains!
+                if not bond.attrib["k"] == "700":
+                    p1 = bond.attrib["p1"]
+                    p2 = bond.attrib["p2"]
+                    yield p1, p2
 
 def bonds_from_pdb(filename):
     #Generate bond info iterator from pdb (kinda deprecated)
@@ -60,10 +68,16 @@ if __name__ == "__main__":
     #parser IO
     parser = argparse.ArgumentParser(
                         prog='TCL-Generator for Calvados',
-                        description='Takes a calvados topology.pdb and generates a TCL sctipt to tell VMD which Atoms are bond.',
+                        description='Takes a calvados pdb or xml file and generates a TCL sctipt to tell VMD which Atoms are bond. You can use it via positional arguments or via tags.',
                         epilog='END')
-    parser.add_argument('inputfile') 
-    parser.add_argument('outputfile') 
+    parser.add_argument("-i", "--inputfile",
+                        default=None,
+                        help = "Tag defined input file,",
+                        required = True)
+    parser.add_argument("-o", "--outputfile",
+                        default = "bonds.tcl",
+                        help = "Tag defined output file.",
+                        required = False)
     args = parser.parse_args()
 
     input_file = args.inputfile
