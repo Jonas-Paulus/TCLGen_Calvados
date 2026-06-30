@@ -10,13 +10,15 @@ def bonds_from_xml(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     forces = root.find("Forces")
-    bonds = forces[2][0]
-
-    for bond in bonds:
-        #print(bond.attrib)
-        p1 = bond.attrib["p1"]
-        p2 = bond.attrib["p2"]
-        yield p1, p2
+    for force in forces:
+        if force.attrib["energy"] == "k*(r-r0)^2":
+            bonds = force.find("Bonds")
+            print(bonds[0].attrib)
+            for bond in bonds:
+                #print(bond.attrib)
+                p1 = bond.attrib["p1"]
+                p2 = bond.attrib["p2"]
+                yield p1, p2
 
 def bonds_from_pdb(filename):
     #Generate bond info iterator from pdb (kinda deprecated)
