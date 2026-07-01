@@ -1,0 +1,6 @@
+# Always include the license and the README
+include LICENSE
+include README.md
+
+# Include *all* files inside the media folder (recursively)
+recursive-include media *

@@ -1,0 +1,34 @@
+# pyproject.toml
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "TCLGen_Calvados"
+version = "0.2.0"
+description = "Generates a TCL script to provide VMD bond information from CALVADOS simulations."
+readme = "README.md"
+requires-python = ">=3.8"
+license = "CC0-1.0"         
+authors = [
+    {name = "Jonas Paulus", email = "jpaulu01@uni-mainz.de"},
+]
+# List any third‑party libraries your script needs:
+dependencies = [
+    "argparse>=1.1",
+]
+
+[project.scripts]           # ← creates a bin/TCLGen_Calvados entry point
+TCLGen_Calvados = "TCLGen_Calvados.__main__:main"
+
+[tool.setuptools]
+# Tell setuptools that the *root* of all packages lives in "src"
+package-dir = {"" = "src"}
+
+# Include any data files that the package itself needs at runtime
+include-package-data = true
+
+# Find *all* packages under src (ignoring tests, docs, etc.)
+[tool.setuptools.packages.find]
+where = ["src"]
+#exclude = ["tests*"]
