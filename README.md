@@ -2,6 +2,7 @@
 This is a simple python script to generate a TCL script which can be loaded in VMD to visualise the bonds in a calvados simulation.
 It can be executed via 
 python TCL_Generator_Calvados.py -i [patht/[protein_name].[xml/txt/pdb]] -o [output_path/file.tcl]
+UPDATE: both arguments are now optional. The default will search the folder for an xml file.
 
 ![Example visualisation](media/example_output.png)
 
