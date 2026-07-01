@@ -1,3 +1,14 @@
+"""
+This is a simple script generator to visualise calvados simulations in vmd.
+VMD is a visualisation tool from the university of Illinois and has its Problems
+with visualising coarse grained data. This code generates a tcl script with bond information.
+
+Copyright (c) 2026 Jonas Paulus. 
+Licensed under CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/).
+This code is in the public domain to be fully available to you.
+Please note that the author would appreciate it if he gets credited in scientific work.
+"""
+
 import argparse
 import xml.etree.ElementTree as ET
 import warnings
